@@ -6,7 +6,8 @@ Coded By : a-asaker.
 
 # Usage: 
 
-    ./Scanner.py [IP] [IP-Range] ...
-  * Example:
-       
-    ./Scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238    
+        ./Scanner.py [IP] [IP-Range] ...
+
+* Example:
+
+        ./Scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238
