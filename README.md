@@ -11,3 +11,7 @@ Coded By : a-asaker.
 -Example:
 
     ./Scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238
+
+* Note : 
+
+    You Should Add This Project To The Allowed/Trusted List Of The Firewall Or Disable Your Firewall Before Using This Project, Otherwise It Won't Work Properly.
