@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
+#Coded By : A_Asaker 
+
 import socket
 from sys import argv
 
+
+socket.setdefaulttimeout(5)
+ips=[]
+up=[]
+filtered=[]
 
 def Usage():
 	print(''' [-] Active IPs Scanner Usage :
@@ -10,11 +17,6 @@ def Usage():
     - Example :
 	    ./Scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238
 		''')
-
-socket.setdefaulttimeout(5)
-ips=[]
-up=[]
-filtered=[]
 
 def chk_ip(i_ip,f_ip):
 	if f_ip>i_ip:
@@ -52,8 +54,6 @@ for arg in argv[1:]:
 	cnfg_ip(arg)
 
 def scan():
-	# if ip_class=="P":port=80
-	# else:port=84
 	msk_dict={"":""}
 	priv_ip=[(s.connect(('1.1.1.1', 1)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
 	priv_mask = priv_ip[:priv_ip.rfind(".")+1]
@@ -90,7 +90,7 @@ def scan():
 
 def res_print():
 	if len(filtered):
-		print("\n [*]Filtered IPs : ")
+		print("\n [*]Filtered IPs (Firewall Blocks The Connection Or May Be Down.) : ")
 		for ip in filtered:
 			print(" - ",ip)	
 	if len(up):
