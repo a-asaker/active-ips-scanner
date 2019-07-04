@@ -7,14 +7,14 @@ from sys import argv
 
 def Usage():
 	print(''' [-] Active IPs Scanner Usage :
-    ./Scanner.py [IP] [IP] [IP-range] ... [Options]
+    ./ip_scanner.py [IP] [IP] [IP-range] ... [Options]
 
     - Options : 
 		-v Or -V : Verbose Mode
 	    
     - Example :
-	    ./Scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238
-	    ./Scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238 -V
+	    ./ip_scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238
+	    ./ip_scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238 -V
 		''')
 	exit(1)
 
