@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
-#Coded By : A_Asaker 
+# Coded By : A_Asaker
 
 import socket
 from sys import argv
 
 
-socket.setdefaulttimeout(5)
-ips=[]
-up=[]
-filtered=[]
-
 def Usage():
 	print(''' [-] Active IPs Scanner Usage :
-        ./Scanner.py [IP] [IP] [IP-range] ...
+    ./Scanner.py [IP] [IP] [IP-range] ... [Options]
+
+    - Options : 
+		-v Or -V : Verbose Mode
 	    
     - Example :
 	    ./Scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238
+	    ./Scanner.py 192.168.1.1-10 192.168.1.150 172.217.18.238 -V
 		''')
+	exit(1)
+
+socket.setdefaulttimeout(3)
+ips=[]
+up=[]
+filtered=[]
 
 def chk_ip(i_ip,f_ip):
 	if f_ip>i_ip:
@@ -50,54 +55,91 @@ def cnfg_ip(arg):
 		Usage()
 		exit(0)
 
-for arg in argv[1:]:
-	cnfg_ip(arg)
+v=0
 
-def scan():
-	msk_dict={"":""}
-	priv_ip=[(s.connect(('1.1.1.1', 1)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
-	priv_mask = priv_ip[:priv_ip.rfind(".")+1]
-	msk_dict={priv_mask:1}
-	print()
-	for ip in ips:
-		sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-		mask = ip[:ip.rfind(".")+1]
-		if mask in list(msk_dict):
-			pass
-		else:
-			msk_dict[mask]=0
-		try :
-			sock.connect((ip,80))
+for arg in argv[1:]:
+	if arg=="-v" or arg=="-V":
+		v=1
+	else:
+		cnfg_ip(arg)
+
+if len(argv)==1:
+	Usage()
+elif len(argv)==2 and v==1:
+	Usage()
+
+def scan(ip,port):
+	if port==80:next_port=53
+	else:next_port=443
+	sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+	mask = ip[:ip.rfind(".")+1]
+	if mask in list(msk_dict):
+		pass
+	else:
+		msk_dict[mask]=0
+	try :
+		sock.connect((ip,port))
+		if v==1:
 			print(" IP :",ip,"Is Up.")
-			up.append(ip)
-			sock.close()
-			msk_dict.update({mask:1})
-		except ConnectionRefusedError:
+		up.append(ip)
+		sock.close()
+		msk_dict.update({mask:1})
+		return "UP"
+	except ConnectionRefusedError:
+		if v==1:
 			print(" IP :",ip,"Is Up.")
-			up.append(ip)
-			msk_dict.update({mask:1})
-		except (socket.gaierror) as e:
-			print(" [!] {} Is Not A Vaild Ip Address.".format(ip))
-			break
-		except socket.timeout:
-			if msk_dict[mask]==1:
+		up.append(ip)
+		msk_dict.update({mask:1})
+		return "UP"
+	except (socket.gaierror) as e:
+		print(" [!] {} Is Not A Vaild Ip Address.".format(ip))
+		return
+	except socket.timeout:
+		if msk_dict[mask]==1:
+			if v==1:
 				print(" IP :",ip,"Is Filtered.")
-				filtered.append(ip)
+			filtered.append(ip)
+			return "FILTERED"
+		else:
+			if port==443:
+				return "DOWN"
 			else:
-				print(" IP :",ip,"May be Down Or Unreachable.")
-		except:
-			print(" IP :",ip,"Is Down.")
+				stat=scan(ip,next_port)
+				if port==53:
+					return "DOWN"
+				if stat != "UP":
+					if v==1:
+						print(" IP :",ip,"May be Filtered, Down Or Unreachable.")
+	except Exception as e:
+		if port==443:
+			return "DOWN"
+		else:
+			stat=scan(ip,next_port)
+			if port==53:
+				return "DOWN"
+			if stat != "UP":
+				if v==1:
+					print(" IP :",ip,"Is Down.")
+
+print("\n [<|>] Scanning [{} Device/s] ... ".format(len(ips)),end="")
+msk_dict={"":""}
+priv_ip=[(s.connect(('1.1.1.1', 1)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
+priv_mask = priv_ip[:priv_ip.rfind(".")+1]
+msk_dict={priv_mask:1}
+if v==1:
+	print()
+for ip in ips:
+	scan(ip,80)
 
 def res_print():
 	if len(filtered):
-		print("\n [*]Filtered IPs (Firewall Blocks The Connection Or May Be Down.) : ")
+		print("\n [*]Filtered IPs : ")
 		for ip in filtered:
 			print(" - ",ip)	
 	if len(up):
 		print("\n [*]Active IPs : ")
 		for ip in up:
 			print(" - ",ip)
+	print(" Total Active Devices : [{}] Device/s".format(len(up)))
 	print()
-
-scan()
 res_print()
